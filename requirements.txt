@@ -3,3 +3,4 @@ uvicorn
 pydantic
 requests
 elasticsearch==7.10.1
+pytest

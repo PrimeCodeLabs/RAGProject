@@ -1,12 +1,24 @@
-import requests
-from app.config import Config
+from elasticsearch import Elasticsearch
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ElasticsearchAdapter:
-    def __init__(self):
-        self.url = Config.ELASTICSEARCH_URL
+    def __init__(self, url="http://elasticsearch:9200"):
+        self.client = Elasticsearch(url)
 
-    def retrieve_documents(self, query: str):
-        response = requests.post(f"{self.url}/_search", json={"query": {"match": {"content": query}}})
-        response.raise_for_status()
-        hits = response.json()['hits']['hits']
-        return [hit['_source']['content'] for hit in hits]
+    def search_documents(self, query):
+        search_query = {
+            "query": {
+                "match": {
+                    "content": query
+                }
+            }
+        }
+        response = self.client.search(
+            index="documents",
+            body=search_query,
+            headers={"Content-Type": "application/json"}
+        )
+        logger.info(f"Elasticsearch response: {response}")
+        return response
